@@ -32,14 +32,17 @@ module.exports = {
   },
   findOne: async (req, res) => {
     const id = req.params.id;
-    const cancion = await Cancion.findByPk(id);
+    try {
+      const cancion = await Cancion.findByPk(id);
     res.json(cancion);
+    } catch (error) {
+      console.error(error)
+    }
   },
   update: async (req, res) => {
     const id = req.params.id;
     try {
       const cancionEncontrada = await Cancion.findByPk(id);
-      console.log(cancionEncontrada + 'cancion encontrada')
       const datosActualizados = await Cancion.update(
         {
           titulo: req.body.titulo ? req.body.titulo : cancionEncontrada.titulo,
@@ -61,7 +64,17 @@ module.exports = {
   },
   delete: async (req, res) => {
     const id = req.params.id;
-    await Cancion.destroy({ where: { id } });
-    res.json({  mensaje: "Canción eliminada correctamente." });
+    const songToDelete = await Cancion.findByPk(id);
+    if(songToDelete){
+      try { await Cancion.destroy({ where: { id } });
+      res.json({  mensaje: "Canción eliminada correctamente." });
+    } catch (error) {
+      console.log(error)
+    }
+    }else{
+      res.json({mensaje: "La cancion con el " + id + " No existe en la base de datos"})
+    }
+    
+
   },
 };
